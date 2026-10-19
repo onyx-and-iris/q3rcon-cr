@@ -42,6 +42,7 @@ Usage: q3rcon [options] <command>
     -p PORT, --port PORT             Server port
     -w PASS, --password PASS         RCON password
     -i, --interactive                Interactive mode
+        --version                    Show version
         --help                       Show help
 ```
 

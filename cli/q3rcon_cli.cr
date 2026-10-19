@@ -22,6 +22,10 @@ OptionParser.parse do |parser|
   parser.on("-p PORT", "--port PORT", "Server port") { |v| port = v.to_i }
   parser.on("-w PASS", "--password PASS", "RCON password") { |v| password = v }
   parser.on("-i", "--interactive", "Interactive mode") { interactive = true }
+  parser.on("--version", "Show version") do
+    puts "q3rcon #{Q3Rcon::VERSION}"
+    exit
+  end
 
   parser.on("--help", "Show help") do
     puts parser
