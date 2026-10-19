@@ -1,0 +1,41 @@
+name: Release q3rcon
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    # Only release if the tag was pushed to main
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v') && github.event.base_ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Crystal
+        uses: crystal-lang/install-crystal@v1
+        with:
+          crystal: latest
+
+      - name: Install shards
+        run: shards install
+
+      - name: Build q3rcon CLI
+        run: shards build q3rcon --release
+
+      - name: Package artifact
+        run: |
+          mkdir -p dist
+          cp bin/q3rcon dist/q3rcon
+          tar -czf q3rcon-${{ github.ref_name }}.tar.gz dist
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: q3rcon-${{ github.ref_name }}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
