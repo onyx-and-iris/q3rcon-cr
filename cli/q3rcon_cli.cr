@@ -22,6 +22,7 @@ OptionParser.parse do |parser|
   parser.on("-p PORT", "--port PORT", "Server port") { |v| port = v.to_i }
   parser.on("-w PASS", "--password PASS", "RCON password") { |v| password = v }
   parser.on("-i", "--interactive", "Interactive mode") { interactive = true }
+
   parser.on("--version", "Show version") do
     puts "q3rcon #{Q3Rcon::VERSION}"
     exit
@@ -48,7 +49,12 @@ timeouts = {
   "map_restart" => 1.second,
 }
 
-client = Q3Rcon::Client.new(host, port, password, timeouts: timeouts)
+begin
+  client = Q3Rcon::Client.new(host, port, password, timeouts: timeouts)
+rescue ex : Q3Rcon::LoginTimeoutError | Q3Rcon::BadPasswordError | Q3Rcon::MissingPasswordError
+  STDERR.puts "Error: #{ex.class} #{ex.message}"
+  exit 1
+end
 
 # --- INTERACTIVE MODE ---
 if interactive
@@ -67,7 +73,7 @@ if interactive
       resp = client.exec(input)
       puts strip_colors(resp)
     rescue ex
-      STDERR.puts "Error: #{ex.message}"
+      STDERR.puts "Error: #{ex.class} #{ex.message}"
     end
   end
 

@@ -26,7 +26,7 @@ module Q3Rcon
       default_timeout : Time::Span = 20.milliseconds,
       timeouts : Hash(String, Time::Span) = Hash(String, Time::Span).new,
     )
-      raise "no password provided" if password.empty?
+      raise Q3Rcon::MissingPasswordError.new("no password provided") if password.empty?
 
       @conn = Q3Rcon::UDPConn.new(host, port)
       @request = Request.new(password)
@@ -73,13 +73,13 @@ module Q3Rcon
       deadline = Time.utc + login_timeout
 
       loop do
-        raise "login timeout" if Time.utc >= deadline
+        raise Q3Rcon::LoginTimeoutError.new("login timeout") if Time.utc >= deadline
 
         resp = exec("login", default_timeout)
         next if resp.empty?
 
         if resp.includes?("Bad rcon")
-          raise "bad rcon password"
+          raise Q3Rcon::BadPasswordError.new("bad rcon password")
         end
 
         break
@@ -97,7 +97,7 @@ module Q3Rcon
           begin
             rlen, _addr = conn.socket.receive(resp_buf)
           rescue ex : IO::TimeoutError
-            # timeout ends the response collection, like Go/Python
+            # timeout ends the response collection
             break
           rescue ex
             err_chan.send(ex)

@@ -2,5 +2,13 @@
 require "./q3rcon/client"
 
 module Q3Rcon
-  VERSION = "0.1.0"
+  VERSION = "0.2.0"
+
+  class Error < Exception; end
+
+  class LoginTimeoutError < Error; end
+
+  class BadPasswordError < Error; end
+
+  class MissingPasswordError < Error; end
 end
