@@ -1,3 +1,5 @@
+![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+
 # q3rcon-cr
 
 A Quake3 RCON implementation
@@ -26,7 +28,7 @@ client = Q3Rcon::Client.new(
   ENV["Q3RCON_PASSWORD"]? || "changeme"
 )
 
-# Send an RCON command
+# Send a RCON command
 response = client.exec("status")
 
 puts response
