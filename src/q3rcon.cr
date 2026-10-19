@@ -2,7 +2,7 @@
 require "./q3rcon/client"
 
 module Q3Rcon
-  VERSION = "0.2.0"
+  VERSION = "0.2.1"
 
   class Error < Exception; end
 

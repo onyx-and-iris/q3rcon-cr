@@ -49,42 +49,37 @@ timeouts = {
   "map_restart" => 1.second,
 }
 
+client = nil
+
 begin
   client = Q3Rcon::Client.new(host, port, password, timeouts: timeouts)
-rescue ex : Q3Rcon::LoginTimeoutError | Q3Rcon::BadPasswordError | Q3Rcon::MissingPasswordError
+
+  if interactive
+    puts "Interactive RCON mode. Enter commands, or 'Q' to quit."
+
+    loop do
+      print "> "
+      raw = gets
+      break unless raw
+
+      input = raw.strip
+      break if input.upcase == "Q"
+      next if input.empty?
+
+      begin
+        resp = client.exec(input)
+        puts strip_colors(resp)
+      rescue ex : Q3Rcon::Error
+        STDERR.puts "Error: #{ex.class} #{ex.message}"
+      end
+    end
+  else
+    resp = client.exec(command)
+    puts strip_colors(resp)
+  end
+rescue ex : Q3Rcon::Error
   STDERR.puts "Error: #{ex.class} #{ex.message}"
   exit 1
+ensure
+  client.try &.close
 end
-
-# --- INTERACTIVE MODE ---
-if interactive
-  puts "Interactive RCON mode. Enter commands, or 'Q' to quit."
-
-  loop do
-    print "> "
-    raw = gets
-    break unless raw
-
-    input = raw.strip
-    break if input.upcase == "Q"
-    next if input.empty?
-
-    begin
-      resp = client.exec(input)
-      puts strip_colors(resp)
-    rescue ex
-      STDERR.puts "Error: #{ex.class} #{ex.message}"
-    end
-  end
-
-  exit 0
-end
-
-# --- SINGLE COMMAND MODE ---
-if command.empty?
-  STDERR.puts "Error: command is required"
-  exit 1
-end
-
-resp = client.exec(command)
-puts strip_colors(resp)
