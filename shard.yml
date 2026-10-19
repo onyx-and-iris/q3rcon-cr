@@ -1,0 +1,13 @@
+name: q3rcon
+version: 0.1.0
+
+authors:
+  - onyx-and-iris <code@onyxandiris.online>
+
+crystal: '>= 1.22.0'
+
+license: MIT
+
+targets:
+  q3rcon:
+    main: cli/q3rcon_cli.cr

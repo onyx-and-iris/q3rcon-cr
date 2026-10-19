@@ -1,0 +1,40 @@
+version: '3'
+
+vars:
+  PROGRAM: q3rcon
+
+tasks:
+  default:
+    desc: Build the q3rcon CLI by default
+    cmds:
+      - task: build
+
+  build:
+    desc: Build the q3rcon CLI
+    cmds:
+      - mkdir -p bin
+      - crystal build cli/q3rcon_cli.cr -o bin/{{.PROGRAM}}
+
+  run:
+    desc: 'Run the q3rcon CLI. Usage: "task run -- [options] [command]"'
+    cmds:
+      - crystal run cli/q3rcon_cli.cr -- {{.CLI_ARGS}}
+
+  clean:
+    desc: Remove build artifacts
+    cmds:
+      - rm -rf bin
+
+  bump:
+    desc: 'Bump the version. Usage: "task bump -- show" or "task bump -- [patch|minor|major]".'
+    preconditions:
+      - sh: 'command -v bump >/dev/null 2>&1'
+        msg: "The 'bump' command is not available. Please `go install github.com/onyx-and-iris/bump/cmd/bump@latest`."
+    cmds:
+      - |
+        {{if eq .CLI_ARGS "show"}}
+          bash -c "bump show -f src/{{.PROGRAM}}.cr -p 'VERSION = .(\\d+\\.\\d+\\.\\d+).' "
+        {{else}}
+          bash -c "bump {{.CLI_ARGS}} -w -f src/{{.PROGRAM}}.cr -p 'VERSION = .(\\d+\\.\\d+\\.\\d+).' -pp"
+          bash -c "bump {{.CLI_ARGS}} -w -f shard.yml -p 'version: (\\d+\\.\\d+\\.\\d+)' -pp"
+        {{end}}
